@@ -1,0 +1,591 @@
+[
+    {
+        "id": "0af9378e151322f4",
+        "type": "tab",
+        "label": "Mixer Dashboard",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "e8269850bbf466bd",
+        "type": "uibuilder",
+        "z": "0af9378e151322f4",
+        "name": "",
+        "topic": "",
+        "url": "MixerDashboard",
+        "fwdInMessages": false,
+        "allowScripts": false,
+        "allowStyles": false,
+        "copyIndex": true,
+        "templateFolder": "blank",
+        "extTemplate": "",
+        "showfolder": false,
+        "reload": false,
+        "sourceFolder": "src",
+        "deployedVersion": "6.0.0",
+        "showMsgUib": false,
+        "x": 800,
+        "y": 300,
+        "wires": [
+            [
+                "c225a851eb7d26cb",
+                "062b65c8b0c61eb0",
+                "ba52d34f5f2bb209",
+                "874d8469fbe8f595",
+                "3c7c284c246c031e",
+                "965914e93c50510b"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "26b25bf38b70efd7",
+        "type": "mysql",
+        "z": "0af9378e151322f4",
+        "mydb": "cd25ae094145fc36",
+        "name": "",
+        "x": 1280,
+        "y": 240,
+        "wires": [
+            [
+                "742dbdbde086b63c"
+            ]
+        ]
+    },
+    {
+        "id": "6a589574e4c40d34",
+        "type": "http request",
+        "z": "0af9378e151322f4",
+        "name": "Get Datalogger php",
+        "method": "GET",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "http://192.168.50.59/channels.php",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "authType": "",
+        "x": 350,
+        "y": 240,
+        "wires": [
+            [
+                "8daaf570ed570ac9",
+                "a6fa60b1a42ef9e8"
+            ]
+        ]
+    },
+    {
+        "id": "8daaf570ed570ac9",
+        "type": "function",
+        "z": "0af9378e151322f4",
+        "name": "Handle Results",
+        "func": "msg.topic = \"DataLoggerData\";\nvar tempLength = 0;\nvar motorLength = 0;\nvar Temp = 0;\nvar Motor = 0;\n\n// Get Index of data values by name\nvar tempIndex = 14 + msg.payload.search(\"TEMP\");\nvar motorIndex = 15 + msg.payload.search(\"Motor\");\n\n// Stop message if the http request produces a message with error in it\nif(!msg.payload.includes(\"Error\"))\n{\n    // Get the length of the data values\n    while(msg.payload.slice(tempIndex+tempLength, (tempIndex+tempLength)+1) != \"<\")\n    {\n        tempLength++;\n    }\n    \n    while(msg.payload.slice(motorIndex+motorLength, (motorIndex+motorLength)+1) != \"<\")\n    {\n        motorLength++;\n    }\n    \n    Temp = msg.payload.slice(tempIndex, tempIndex+tempLength);\n    Motor = msg.payload.slice(motorIndex, motorIndex+motorLength);\n    msg.motor = Motor*3.2;\n    msg.temp = (((Temp-4)/16)*100).toFixed(2)\n    return msg; \n}\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 560,
+        "y": 240,
+        "wires": [
+            [
+                "e8269850bbf466bd",
+                "8b5c58785f7244c8",
+                "8e583e7031b0fa85"
+            ]
+        ]
+    },
+    {
+        "id": "c225a851eb7d26cb",
+        "type": "function",
+        "z": "0af9378e151322f4",
+        "name": "If \"dataLoggerData\"",
+        "func": "if(msg.payload == \"dataLoggerData\")\n{\n    return msg;\n}",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1070,
+        "y": 280,
+        "wires": [
+            [
+                "26b25bf38b70efd7"
+            ]
+        ]
+    },
+    {
+        "id": "062b65c8b0c61eb0",
+        "type": "function",
+        "z": "0af9378e151322f4",
+        "name": "If \"request\"",
+        "func": "if(msg.topic == \"request\")\n{\n    return msg;\n}\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1050,
+        "y": 320,
+        "wires": [
+            [
+                "2b9862f4c80aa9ed",
+                "88d9827ed64fc625"
+            ]
+        ]
+    },
+    {
+        "id": "bb86c86b5b8bf305",
+        "type": "link in",
+        "z": "0af9378e151322f4",
+        "name": "This",
+        "links": [
+            "2b9862f4c80aa9ed"
+        ],
+        "x": 215,
+        "y": 240,
+        "wires": [
+            [
+                "6a589574e4c40d34"
+            ]
+        ]
+    },
+    {
+        "id": "2b9862f4c80aa9ed",
+        "type": "link out",
+        "z": "0af9378e151322f4",
+        "name": "That",
+        "links": [
+            "bb86c86b5b8bf305"
+        ],
+        "x": 1195,
+        "y": 320,
+        "wires": []
+    },
+    {
+        "id": "8b5c58785f7244c8",
+        "type": "debug",
+        "z": "0af9378e151322f4",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "temp",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 780,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "e5902ff3902566f3",
+        "type": "inject",
+        "z": "0af9378e151322f4",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payloadType": "str",
+        "x": 110,
+        "y": 240,
+        "wires": [
+            [
+                "6a589574e4c40d34"
+            ]
+        ]
+    },
+    {
+        "id": "96e5acf43edc57e9",
+        "type": "http request",
+        "z": "0af9378e151322f4",
+        "name": "API Request",
+        "method": "POST",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "https://link.pulserl.com/api/",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "authType": "",
+        "x": 370,
+        "y": 300,
+        "wires": [
+            [
+                "b5c804048bac5b1b"
+            ]
+        ]
+    },
+    {
+        "id": "ba52d34f5f2bb209",
+        "type": "function",
+        "z": "0af9378e151322f4",
+        "name": "If \"APIRequest\"",
+        "func": "if(msg.topic == \"APIRequest\")\n{\n    return msg;\n}",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1060,
+        "y": 360,
+        "wires": [
+            [
+                "756aad55e628da07"
+            ]
+        ]
+    },
+    {
+        "id": "756aad55e628da07",
+        "type": "link out",
+        "z": "0af9378e151322f4",
+        "name": "API OUT",
+        "links": [
+            "5ed1c70210de209d"
+        ],
+        "x": 1195,
+        "y": 360,
+        "wires": []
+    },
+    {
+        "id": "5ed1c70210de209d",
+        "type": "link in",
+        "z": "0af9378e151322f4",
+        "name": "API IN",
+        "links": [
+            "756aad55e628da07"
+        ],
+        "x": 75,
+        "y": 300,
+        "wires": [
+            [
+                "a9504cd169f7a39d"
+            ]
+        ]
+    },
+    {
+        "id": "a9504cd169f7a39d",
+        "type": "function",
+        "z": "0af9378e151322f4",
+        "name": "",
+        "func": "var StartDate = \"2021-10-07\";\nvar EndDate = \"2021-10-28\";\n\nmsg.topic = 'SAPAPI'\nvar code;\nDocNum = flow.get(\"Code\");\n\nmsg.payload = '{\"api_version\" : 1, \"api_action\" : \"get_work_orders\",\"api_key\" : \"7baf2d96-c614-45dd-b06f-0965671c56dd\",\"DocNum\":\"'+msg.payload+'\"}';\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 180,
+        "y": 300,
+        "wires": [
+            [
+                "96e5acf43edc57e9"
+            ]
+        ]
+    },
+    {
+        "id": "380e9661f72c4127",
+        "type": "inject",
+        "z": "0af9378e151322f4",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "{\"api_version\" : 1, \"api_action\" : \"get_work_orders\",\"api_key\" : \"7baf2d96-c614-45dd-b06f-0965671c56dd\",\"DocNum\":\"115287\"}",
+        "payloadType": "str",
+        "x": 190,
+        "y": 340,
+        "wires": [
+            [
+                "96e5acf43edc57e9"
+            ]
+        ]
+    },
+    {
+        "id": "74db470beb8e32bd",
+        "type": "change",
+        "z": "0af9378e151322f4",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "Code",
+                "pt": "flow",
+                "to": "payload",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1240,
+        "y": 400,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "874d8469fbe8f595",
+        "type": "function",
+        "z": "0af9378e151322f4",
+        "name": "If \"Scan\"",
+        "func": "// Continues the message if the topic of the message \n// from the interface is \"Request\"\nif(msg.topic == \"Scan\")\n{\n    return msg;\n}\nelse\n{\n   return null; \n}",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1040,
+        "y": 400,
+        "wires": [
+            [
+                "74db470beb8e32bd"
+            ]
+        ]
+    },
+    {
+        "id": "b5c804048bac5b1b",
+        "type": "function",
+        "z": "0af9378e151322f4",
+        "name": "Handle Results",
+        "func": "var Result = msg.payload;\nvar Results = [];\nmsg.topic = \"APIResults\";\n\nif(Result == \"[]\" || Result == \"undefined\")\n{\n    msg.topic = \"NoDocFound\"\n    return msg;\n}\n\n// Remove unnecessary characters\nResult = Result.replace(/,/g, ',<br>');\nResult = Result.replace(/\"/g,\"\");\nResult = Result.replace(/},/g, ',<br>');\nResult = Result.replace(/:/g, '');\nResult = Result.replace(/[\\[\\]{},\"]+/g,'');\nResult = Result.replace('U_RtgCode','');\nResult = Result.replace('U_ItemCode','');\nResult = Result.replace('DocNum','');\nResult = Result.replace('title','');\nResult = Result.replace('start','');\nResult = Result.replace('planned_end','');\nResult = Result.replace('id',''); \nResult = Result.replace('quantity','');\nResult = Result.replace('actual_quantity','');\nResult = Result.replace('inventory_uom','');\nResult = Result.replace('warehouse','');\nResult = Result.replace('last_updated','');\nResult = Result.replace('status','');\nResult = Result.replace('priority','');\nResult = Result.replace('remarks','');\n\n// Split the results by work order\nResults = Result.split('<br>');\nmsg.payload = Results;\nResults[4] = Results[4].substring(0, 10);\nResults[5] = Results[5].substring(0, 10);\nResults[11] = Results[11].substring(0, 10);\nmsg.Unit = parseInt(Results[9]);\nreturn msg; ",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 560,
+        "y": 300,
+        "wires": [
+            [
+                "e8269850bbf466bd",
+                "eb014a5adbc6b611"
+            ]
+        ]
+    },
+    {
+        "id": "f27c889b91b94d12",
+        "type": "uibuilder",
+        "z": "0af9378e151322f4",
+        "name": "",
+        "topic": "",
+        "url": "uibuilder",
+        "fwdInMessages": false,
+        "allowScripts": false,
+        "allowStyles": false,
+        "copyIndex": true,
+        "templateFolder": "blank",
+        "extTemplate": "",
+        "showfolder": false,
+        "reload": false,
+        "sourceFolder": "src",
+        "x": 120,
+        "y": 160,
+        "wires": [
+            [],
+            []
+        ]
+    },
+    {
+        "id": "742dbdbde086b63c",
+        "type": "link out",
+        "z": "0af9378e151322f4",
+        "name": "Data OUT",
+        "links": [
+            "35ba7ef1c619fa13"
+        ],
+        "x": 1415,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "35ba7ef1c619fa13",
+        "type": "link in",
+        "z": "0af9378e151322f4",
+        "name": "Data IN",
+        "links": [
+            "742dbdbde086b63c"
+        ],
+        "x": 315,
+        "y": 360,
+        "wires": [
+            [
+                "e7fb7f5af2e6cbea",
+                "134637d0dee4de08"
+            ]
+        ]
+    },
+    {
+        "id": "e7fb7f5af2e6cbea",
+        "type": "function",
+        "z": "0af9378e151322f4",
+        "name": "set data topic",
+        "func": "\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 550,
+        "y": 360,
+        "wires": [
+            [
+                "e8269850bbf466bd"
+            ]
+        ]
+    },
+    {
+        "id": "3c7c284c246c031e",
+        "type": "function",
+        "z": "0af9378e151322f4",
+        "name": "If \"sendData\"",
+        "func": "if(msg.payload == \"sendData\")\n{\n    return msg;\n}\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1050,
+        "y": 240,
+        "wires": [
+            [
+                "26b25bf38b70efd7"
+            ]
+        ]
+    },
+    {
+        "id": "eb014a5adbc6b611",
+        "type": "debug",
+        "z": "0af9378e151322f4",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 790,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "965914e93c50510b",
+        "type": "function",
+        "z": "0af9378e151322f4",
+        "name": "If \"sendData2\"",
+        "func": "if(msg.payload == \"sendData2\")\n{\n    return msg;\n}",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1060,
+        "y": 200,
+        "wires": [
+            [
+                "26b25bf38b70efd7"
+            ]
+        ]
+    },
+    {
+        "id": "a6fa60b1a42ef9e8",
+        "type": "debug",
+        "z": "0af9378e151322f4",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 570,
+        "y": 200,
+        "wires": []
+    },
+    {
+        "id": "88d9827ed64fc625",
+        "type": "debug",
+        "z": "0af9378e151322f4",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1310,
+        "y": 320,
+        "wires": []
+    },
+    {
+        "id": "8e583e7031b0fa85",
+        "type": "debug",
+        "z": "0af9378e151322f4",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "motor",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 790,
+        "y": 180,
+        "wires": []
+    },
+    {
+        "id": "134637d0dee4de08",
+        "type": "debug",
+        "z": "0af9378e151322f4",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 560,
+        "y": 420,
+        "wires": []
+    },
+    {
+        "id": "cd25ae094145fc36",
+        "type": "MySQLdatabase",
+        "name": "",
+        "host": "localhost",
+        "port": "3360",
+        "db": "dbDataLogger",
+        "tz": "",
+        "charset": "UTF8"
+    }
+]
